@@ -133,9 +133,6 @@ body {
   position: relative;
 }
 
-#page-input .input-group {
-  margin-top: 3rem; /* 3 rem from top as requested */
-}
 
 /* --- Page 5: Countdown --- */
 #page-countdown {
@@ -149,6 +146,7 @@ body {
   gap: 1.5rem;
   width: 100%;
   max-width: 500px; /* Increased from 320px to utilize 600px frame */
+  margin-top: -1rem;
 }
 
 #countdown-number {
@@ -250,7 +248,7 @@ body {
 /* Specific style for Page 3 & 4 Next Buttons */
 #btn-next-p3 {
   position: absolute;
-  bottom: 3rem; /* Paling bawah (Very bottom with safe padding) */
+  bottom: 6rem; /* Paling bawah (Very bottom with safe padding) */
   transform: translateX(-50%);
   width: 90%; /* Wider to fill the screen width */
   height: 55px; /* Nice touch target */
@@ -308,7 +306,7 @@ body {
 /* @keyframes bounce { ... } Removed as requested */
 #btn-next-p4 {
   position: absolute;
-  bottom: 3rem; /* Paling bawah (Very bottom with safe padding) */
+  bottom: 6rem; /* Paling bawah (Very bottom with safe padding) */
   width: 90%; /* Wider to fill the screen width */
   height: 55px; /* Nice touch target */
   border-radius: 18px;
