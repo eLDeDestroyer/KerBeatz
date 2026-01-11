@@ -186,7 +186,7 @@ class Tile {
         this.width = width;
         this.height = height;
         this.image = image;
-        this.velocity = 10; // Increased speed as requested
+        this.velocity = 13; // Increased speed as requested
         this.hit = false;
         this.hit = false;
         
