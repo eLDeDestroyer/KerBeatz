@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KerBeatz Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main id="mobile-frame">
+        <!-- Page 1: Splash Screen -->
+        <div id="page-splash" class="page-container">
+            <h1 class="splash-text">KerBeatz</h1>
+        </div>
+
+        <!-- Page 2: Loading Screen -->
+        <div id="page-loading" class="page-container hidden">
+            <p class="loading-text">loading for assets....</p>
+        </div>
+
+        <!-- Page 3: Input Screen -->
+        <div id="page-input" class="page-container hidden">
+            <div class="input-group">
+                <label class="question-text">What's your dream vacation?</label>
+                <input type="text" class="game-input" placeholder="input your name">
+            </div>
+            
+            <!-- Dragon Guide (Visible only on error) -->
+            <div id="dragon-p3" class="dragon-container hidden">
+                 <img src="./assets/image/guide/char.png" alt="Dragon Guide" class="dragon-img">
+                 <div class="dragon-bubble">Please text your name!</div>
+            </div>
+
+            <button id="btn-next-p3" class="game-btn">Next</button>
+        </div>
+
+        <!-- Page 4: Song Selection -->
+        <div id="page-song-select" class="page-container hidden">
+            <div class="input-group" style="gap: 1rem;">
+                <label class="question-text">Select your song</label>
+                <!-- Selectable options instead of inputs -->
+                <div class="song-option" data-song="song one">song one</div>
+                <div class="song-option locked" data-song="River Flows in You">River Flows in You</div>
+                <div class="song-option locked" data-song="Fur Elise">Fur Elise</div>
+            </div>
+            
+            <!-- Dragon Guide for Page 4 (Hidden by default) -->
+            <div id="dragon-p4" class="dragon-container hidden">
+                 <img src="./assets/image/guide/char.png" alt="Dragon Guide" class="dragon-img">
+                 <div class="dragon-bubble">This song is locked!</div>
+            </div>
+            <button id="btn-next-p4" class="game-btn">Next</button>
+        </div>
+
+        <!-- Page 5: Countdown -->
+        <div id="page-countdown" class="page-container hidden">
+            <h1 id="countdown-number" class="scale-in-center">3</h1>
+        </div>
+
+        <!-- Page 6: Game Canvas -->
+        <div id="page-game" class="page-container hidden">
+            <canvas id="board"></canvas>
+            <div id="score-display">0</div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

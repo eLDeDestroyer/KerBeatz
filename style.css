@@ -1,0 +1,350 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap");
+
+:root {
+  --primary-color: hsl(14, 100%, 50%); /* HSBA(14, 100%, 100%, 1) */
+  --secondary-color: hsl(0, 0%, 96%); /* HSBA(0, 0%, 96%, 1) */
+}
+
+/* Reset & Global */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Nunito", sans-serif;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  /* Center the mobile frame on desktop */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #121212; /* Dark background to highlight the 'phone' */
+}
+
+/* Mobile Frame Wrapper (Responsive 300px - 600px) */
+#mobile-frame {
+  width: 100%;
+  min-width: 300px;
+  max-width: 600px;
+  height: 100%;
+  max-height: 900px; /* Reasonable max height */
+  position: relative;
+  overflow: hidden;
+  background-color: white;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+}
+
+/* Utility to hide pages */
+.hidden {
+  display: none !important;
+}
+
+/* Common Page Container */
+.page-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* Removed old transition for better keyframe control */
+}
+
+/* Definition of Game Animation */
+@keyframes gamePopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+    filter: blur(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Apply "Pop" animation to CONTENT only (Loading screen) */
+#page-loading:not(.hidden) .loading-text {
+  animation: gamePopIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Definition of Gentle Animation (Subtle) */
+@keyframes gentleFade {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Override for Input CONTENT only (Don't be excessive) */
+#page-input:not(.hidden) .input-group,
+#page-song-select:not(.hidden) .input-group {
+  animation: gentleFade 0.8s ease-out forwards;
+}
+
+/* Animate Next Button (Slight delay for cascading effect) */
+#page-input:not(.hidden) #btn-next-p3 {
+  opacity: 0; /* Start hidden */
+  animation: gentleFade 0.8s ease-out 0.3s forwards; /* 0.3s delay */
+}
+
+/* --- Page 1: Splash --- */
+#page-splash {
+  background-color: var(--primary-color);
+}
+
+.splash-text {
+  color: var(--secondary-color);
+  font-weight: 800; /* Extra Bold */
+  font-size: 32px;
+  line-height: 135%;
+}
+
+/* --- Page 2: Loading --- */
+#page-loading {
+  background-color: var(--secondary-color);
+}
+
+.loading-text {
+  color: var(--primary-color);
+  font-weight: 800; /* Extra Bold */
+  font-size: 17px;
+  line-height: 135%;
+}
+
+/* --- Page 3 & 4: Input Screens --- */
+#page-input,
+#page-song-select {
+  background-color: var(--primary-color);
+  /* justify-content: center; REMOVED center to allow top positioning */
+  align-items: center; /* Keep horizontal center */
+  padding: 2rem;
+  position: relative;
+}
+
+#page-input .input-group {
+  margin-top: 3rem; /* 3 rem from top as requested */
+}
+
+/* --- Page 5: Countdown --- */
+#page-countdown {
+  background-color: var(--primary-color);
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 500px; /* Increased from 320px to utilize 600px frame */
+}
+
+#countdown-number {
+  font-size: 8rem;
+  color: var(--secondary-color);
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* Beat/Pulse Animation */
+@keyframes pulseBeat {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.scale-in-center {
+  animation: pulseBeat 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+.question-text {
+  color: var(--secondary-color);
+  font-weight: 800; /* Extra Bold */
+  font-size: 18px;
+  line-height: 100%;
+  text-align: center;
+}
+
+.game-input {
+  width: 110%; /* Adjusted to fit 300px frame */
+  padding: 1rem;
+  background-color: var(--secondary-color);
+  border: none;
+  border-radius: 18px; /* Smooth rounded corners */
+  font-family: "Nunito", sans-serif;
+  font-size: 1rem;
+  color: var(--primary-color);
+  outline: none;
+  text-align: left;
+}
+
+.game-input::placeholder {
+  color: rgba(14, 100%, 50%, 0.5); /* Primary color with opacity */
+}
+
+/* Song Option Styles (Like inputs but clickable) */
+.song-option {
+  width: 110%; /* Adjusted to fit 300px frame */
+  padding: 1rem;
+  background-color: var(--secondary-color);
+  border-radius: 18px;
+  font-weight: 700;
+  color: var(--primary-color);
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 3px solid transparent; /* Reserve space for border */
+}
+
+.song-option:hover {
+  transform: scale(1.02);
+}
+
+/* Selected State Indication (Simplified) */
+.song-option.selected {
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
+  border-color: var(--secondary-color); /* Simple dark border */
+  /* Removed scale and shadow for simplicity */
+}
+
+.game-btn {
+  margin-top: 2rem;
+  padding: 1rem 3rem;
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+  font-weight: 800;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.1s;
+}
+
+.game-btn:active {
+  transform: scale(0.95);
+}
+
+/* Specific style for Page 3 & 4 Next Buttons */
+#btn-next-p3 {
+  position: absolute;
+  bottom: 3rem; /* Paling bawah (Very bottom with safe padding) */
+  transform: translateX(-50%);
+  width: 90%; /* Wider to fill the screen width */
+  height: 55px; /* Nice touch target */
+  border-radius: 18px;
+  margin-top: 0;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  display: flex; /* Centering text */
+  justify-content: center;
+  align-items: center;
+}
+
+/* Dragon Guide Styles */
+/* Dragon Guide Styles */
+.dragon-container {
+  position: absolute;
+  top: 4rem; /* Top positioning */
+  right: 1rem; /* Right positioning */
+  display: flex;
+  flex-direction: row-reverse; /* Flip image and bubble */
+  align-items: flex-start;
+  gap: 10px;
+  z-index: 10;
+  animation: gentleFade 0.5s ease-out
+    both; /* Entrance animation (no delay for responsiveness) */
+}
+
+/* Specific styling for locked songs */
+.song-option.locked {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #ccc; /* Gray out slightly */
+  color: #666;
+  border-color: #999;
+}
+
+.dragon-img {
+  width: 80px;
+  height: auto;
+  /* Removed bounce animation */
+}
+
+.dragon-bubble {
+  background: white;
+  color: var(--primary-color);
+  padding: 10px 15px;
+  border-radius: 15px 15px 0 15px; /* Flip the corner for bubble */
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  max-width: 300px;
+  /* Bubble entrance synced with container or separate if needed */
+}
+
+/* @keyframes bounce { ... } Removed as requested */
+#btn-next-p4 {
+  position: absolute;
+  bottom: 3rem; /* Paling bawah (Very bottom with safe padding) */
+  width: 90%; /* Wider to fill the screen width */
+  height: 55px; /* Nice touch target */
+  border-radius: 18px;
+  margin-top: 0;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  display: flex; /* Centering text */
+  justify-content: center;
+  align-items: center;
+}
+
+/* --- Page 6: Game --- */
+/* --- Page 6: Game --- */
+#page-game {
+  /* Using a semi-transparent layer on top of the image */
+  background-image: linear-gradient(hsl(14, 100%, 50%, 0.7), hsl(14, 100%, 50%, 0.7 )), url("./assets/image/background.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: absolute; /* Already in .page-container but reinforcing for canvas */
+}
+
+#board {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* internal resolution will be set in JS */
+}
+
+#score-display {
+  position: absolute;
+  top: 40px;
+  left: 20px;
+  font-size: 32px;
+  font-weight: 800;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  pointer-events: none; /* Let clicks pass through to canvas */
+  z-index: 10;
+}
