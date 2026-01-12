@@ -455,11 +455,6 @@ function showGameOver(score) {
     const savedSong = localStorage.getItem('_song') || "Unknown Song";
     document.getElementById('go-song-name').textContent = savedSong;
     
-    // Update Player Name
-    const savedName = localStorage.getItem('_name') || "Player";
-    const nameEl = document.getElementById('go-player-name');
-    if(nameEl) nameEl.textContent = savedName;
-    
     // High Score Logic (Hardcoded as requested)
     // const highScoreKey = `highscore_${savedSong.replace(/\s+/g, '_')}`;
     // let highScore = parseInt(localStorage.getItem(highScoreKey)) || 0;
