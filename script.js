@@ -9,7 +9,8 @@ const pages = {
     input: document.getElementById('page-input'),
     songSelect: document.getElementById('page-song-select'),
     countdown: document.getElementById('page-countdown'),
-    game: document.getElementById('page-game')
+    game: document.getElementById('page-game'),
+    'game-over': document.getElementById('page-game-over')
 };
 
 const countdownAudio = new Audio('assets/sounds/countdown/countdown.mp3');
@@ -89,6 +90,10 @@ document.addEventListener('DOMContentLoaded', () => {
              const input = document.querySelector('#page-input .game-input');
              if(input && input.value.trim() !== "") {
                  console.log("User Input:", input.value);
+                 // Save Name & Auth to LS
+                 localStorage.setItem('_name', input.value.trim());
+                 localStorage.setItem('_is_auth', 'true');
+
                  // Hide Dragon if visible
                  if(dragonP3) dragonP3.classList.add('hidden');
                  
@@ -154,6 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
         nextBtnP4.addEventListener('click', () => {
              if (selectedSong) {
                 console.log(`Starting with: ${selectedSong}`);
+                localStorage.setItem('_song', selectedSong);
                 startCountdown();
              } else {
                  // Show Dragon Error instead of alert
@@ -391,8 +397,7 @@ class Gameboard {
                 if (!tile.hit) {
                     this.fails++;
                     this.stop(); 
-                    alert("Game Over! Score: " + this.score);
-                    location.reload(); 
+                    showGameOver(this.score);
                     return; 
                 }
                 this.tiles.splice(i, 1);
@@ -428,7 +433,38 @@ class Gameboard {
     }
 }
 
+function showGameOver(score) {
+    showPage('game-over'); // Ensure this ID matches HTML
+    
+    // Save Score to LS
+    localStorage.setItem('_score', score);
+    
+    // Update Score
+    document.getElementById('go-score').textContent = score;
+    
+    // Update Song Name
+    const savedSong = localStorage.getItem('_song') || "Unknown Song";
+    document.getElementById('go-song-name').textContent = savedSong;
+    
+    // High Score Logic (Hardcoded as requested)
+    // const highScoreKey = `highscore_${savedSong.replace(/\s+/g, '_')}`;
+    // let highScore = parseInt(localStorage.getItem(highScoreKey)) || 0;
+    
+    // if (score > highScore) {
+    //    highScore = score;
+    //    localStorage.setItem(highScoreKey, highScore);
+    // }
+    
+    document.getElementById('go-high-score').textContent = `High Score : 211`;
+    
+    // Add logic to hide 'page-game-over' properly on restart if not using reload
+    const restartBtn = document.getElementById('btn-restart');
+    // Remove old listeners to prevent stacking? Or just use one global listener?
+    // Better to have one global listener. Check initGame.
+}
+
 async function initGame() {
+    // ... initGame logic ... (Keeping minimal changes here, restart logic added globally below)
     showPage('game');
     const canvas = document.getElementById("board");
     const container = document.getElementById("page-game");
@@ -456,16 +492,28 @@ async function initGame() {
         if (midi.tracks.length > 0) {
             const rawNotes = midi.tracks[0].notes;
             
-            // Filter Notes: Prevent overlap and reduce density
-            // Sort by time just in case
+            // Filter Notes: Progressive Difficulty
+            // 0-15s: Moderate (Gap 0.6s)
+            // 15-30s: Dense (Gap 0.4s)
+            // 30-45s: Very Dense (Gap 0.3s)
+            // 45s+: Max Density (Gap 0.2s - Phys limit)
+            
             rawNotes.sort((a, b) => a.time - b.time);
             
-            const MIN_NOTE_GAP = 0.3; // 300ms gap
-            let lastNoteTime = -MIN_NOTE_GAP;
+            let lastSpawnTime = -2.0; // Initialize so first note can spawn
             
             midiNotes = rawNotes.filter(note => {
-                if (note.time - lastNoteTime >= MIN_NOTE_GAP) {
-                    lastNoteTime = note.time;
+                const time = note.time;
+                const segment = Math.floor(time / 15);
+                let currentGap = 0.2; // Default (Max)
+                
+                if (segment === 0) currentGap = 0.6; 
+                else if (segment === 1) currentGap = 0.4;
+                else if (segment === 2) currentGap = 0.3;
+                else currentGap = 0.2; 
+                
+                if (time - lastSpawnTime >= currentGap) {
+                    lastSpawnTime = time;
                     return true;
                 }
                 return false;
@@ -505,3 +553,11 @@ async function initGame() {
     };
 }
 
+
+// Global Restart Listener
+const btnRestart = document.getElementById('btn-restart');
+if(btnRestart) {
+    btnRestart.addEventListener('click', () => {
+        location.reload();
+    });
+}

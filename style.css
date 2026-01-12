@@ -146,7 +146,7 @@ body {
   gap: 1.5rem;
   width: 100%;
   max-width: 500px; /* Increased from 320px to utilize 600px frame */
-  margin-top: -1rem;
+  margin-top: -3rem;
 }
 
 #countdown-number {
@@ -360,4 +360,53 @@ body {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   pointer-events: none; /* Let clicks pass through to canvas */
   z-index: 10; /* Top layer */
+}
+
+/* --- Page 7: Game Over --- */
+#page-game-over {
+  background-color: var(--secondary-color);
+  text-align: center;
+}
+
+#go-song-name {
+  font-family: "Nunito", sans-serif;
+  font-weight: 700;
+  color: var(--primary-color);
+  font-size: 32px;
+  line-height: 135%;
+  margin-top: 4rem;
+}
+
+.go-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.go-image {
+  width: 276px;
+  height: 371px;
+  object-fit: contain;
+  margin-bottom: 0.5rem;
+}
+
+#go-score {
+  font-family: "Nunito", sans-serif;
+  font-weight: 700;
+  font-size: 64px;
+  color: var(--secondary-color);
+  background-color: var(--primary-color);
+  padding: 0 2rem;
+  border-radius: 16px;
+  line-height: 1.2;
+}
+
+#go-high-score {
+  color: var(--primary-color);
+  font-size: 24px;
+  font-family: "Nunito", sans-serif; 
+  font-weight: 700; 
+  margin-top: auto;
+  margin-bottom: 2rem;
 }
