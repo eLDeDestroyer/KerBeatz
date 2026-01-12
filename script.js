@@ -66,19 +66,27 @@ function showPage(pageKey) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Start with Splash Screen
-    showPage('splash');
+    // Check for existing session
+    const isPlayed = localStorage.getItem('_is_played') === 'true';
+    if (isPlayed) {
+        // Direct to Game Over
+        const savedScore = localStorage.getItem('_score') || 0;
+        showGameOver(savedScore);
+    } else {
+        // Start with Splash Screen
+        showPage('splash');
 
-    // Transition to Loading after delay
-    setTimeout(() => {
-        showPage('loading');
-
-        // Transition to Input Page after loading delay
+        // Transition to Loading after delay
         setTimeout(() => {
-            showPage('input');
-        }, LOADING_DELAY);
+            showPage('loading');
 
-    }, PRELOAD_DELAY);
+            // Transition to Input Page after loading delay
+            setTimeout(() => {
+                showPage('input');
+            }, LOADING_DELAY);
+
+        }, PRELOAD_DELAY);
+    }
 
     // Button Listener for Page 3 -> Page 4
     const nextBtnP3 = document.getElementById('btn-next-p3');
@@ -92,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
                  console.log("User Input:", input.value);
                  // Save Name & Auth to LS
                  localStorage.setItem('_name', input.value.trim());
-                 localStorage.setItem('_is_auth', 'true');
+                 localStorage.setItem('_is_played', 'true');
 
                  // Hide Dragon if visible
                  if(dragonP3) dragonP3.classList.add('hidden');
@@ -443,8 +451,14 @@ function showGameOver(score) {
     document.getElementById('go-score').textContent = score;
     
     // Update Song Name
+    // Update Song Name
     const savedSong = localStorage.getItem('_song') || "Unknown Song";
     document.getElementById('go-song-name').textContent = savedSong;
+    
+    // Update Player Name
+    const savedName = localStorage.getItem('_name') || "Player";
+    const nameEl = document.getElementById('go-player-name');
+    if(nameEl) nameEl.textContent = savedName;
     
     // High Score Logic (Hardcoded as requested)
     // const highScoreKey = `highscore_${savedSong.replace(/\s+/g, '_')}`;
