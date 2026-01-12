@@ -174,6 +174,11 @@ document.addEventListener('DOMContentLoaded', () => {
 /* =========================
    GAME LOGIC (Piano Tiles)
 ========================= */
+
+
+/* =========================
+   GAME LOGIC (Piano Tiles)
+   ========================= */
 const TILE_IMAGE_URL = "assets/image/block/block_normal.png"; 
 
 class Tile {
@@ -183,36 +188,28 @@ class Tile {
         this.width = width;
         this.height = height;
         this.image = image;
-        this.width = width;
-        this.height = height;
-        this.image = image;
-        this.velocity = 17; // Increased speed as requested
-        this.hit = false;
+        this.velocity = 17; // Speed
         this.hit = false;
         
         // Animation properties
-        this.hitProgress = 0; // 0 to 1 representing the gradient fill
+        this.hitProgress = 0; 
     }
 
     update() {
-        if (!this.hit) {
-            this.y += this.velocity;
-        } else {
+        // Tiles ALWAYS fall, even if hit
+        this.y += this.velocity;
+        
+        if (this.hit) {
             // Hit animation: Red gradient rises up
-            this.hitProgress += 0.05;
+            // Increased speed as requested
+            this.hitProgress += 0.15; 
         }
     }
 
     draw(ctx) {
-        // Draw Main Image
-        // If hit, we might fade it out or just overlay. 
-        // User asked for "gradasi merah dari bawah ke atas ... perlahan lalu menghilang"
-        // Let's keep image visible but overlay the gradient, then fade everything out if needed.
-        // Or simply draw the image, and if hit, draw the gradient on top.
-        
+        // ... (keep existing draw logic)
         let opacity = 1;
         if (this.hit && this.hitProgress > 0.8) {
-            // Fade out at the very end
             opacity = 1 - (this.hitProgress - 0.8) * 5; 
         }
         if (opacity < 0) opacity = 0;
@@ -223,53 +220,29 @@ class Tile {
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
 
         if (this.hit) {
-            // Draw Red Gradient
-            // Height of gradient determined by hitProgress
-            const gradHeight = this.height * Math.min(this.hitProgress, 1);
-            
-            // Calculate limit of the rising bar
-            // rising from bottom (this.y + this.height) upwards
-            const currentY = this.y + this.height - gradHeight;
-            
-            // Dynamic Gradient: Relative to the rising bar
-            // From Bottom of bar (currentY + gradHeight) to Top of bar (currentY)
-            // We want the Top to be Red, Bottom to be Transparent (Tail effect)
-            const gradient = ctx.createLinearGradient(0, currentY + gradHeight, 0, currentY);
-            gradient.addColorStop(0, "rgba(255, 0, 0, 0)");   // Transparent at bottom of wave
-            gradient.addColorStop(1, "rgba(255, 0, 0, 0.8)"); // Red at top of wave (Leading Edge)
+             const gradHeight = this.height * Math.min(this.hitProgress, 1);
+             const currentY = this.y + this.height - gradHeight;
+             const gradient = ctx.createLinearGradient(0, currentY + gradHeight, 0, currentY);
+             gradient.addColorStop(0, "rgba(255, 0, 0, 0)");   
+             gradient.addColorStop(1, "rgba(255, 0, 0, 0.8)"); 
 
-            ctx.fillStyle = gradient;
-            
-            // Rounded Rectangle for the hit effect with 16px radius
-            ctx.beginPath();
-            if (typeof ctx.roundRect === 'function') {
-                 // Draw the rect at currentY position
-                 ctx.roundRect(this.x, currentY, this.width, gradHeight, 16);
-            } else {
-                 // Fallback
-                 const r = 16;
-                 const y = currentY;
-                 const h = gradHeight;
-                 // Ensure radius isn't larger than half height if very small
-                 const effR = Math.min(r, h/2);
-                 
-                 ctx.moveTo(this.x + effR, y);
-                 ctx.lineTo(this.x + this.width - effR, y);
-                 ctx.quadraticCurveTo(this.x + this.width, y, this.x + this.width, y + effR);
-                 ctx.lineTo(this.x + this.width, y + h - effR);
-                 ctx.quadraticCurveTo(this.x + this.width, y + h, this.x + this.width - effR, y + h);
-                 ctx.lineTo(this.x + effR, y + h);
-                 ctx.quadraticCurveTo(this.x, y + h, this.x, y + h - effR);
-                 ctx.lineTo(this.x, y + effR);
-                 ctx.quadraticCurveTo(this.x, y, this.x + effR, y);
-            }
-            ctx.closePath();
-            ctx.fill();
+             ctx.fillStyle = gradient;
+             
+             ctx.beginPath();
+             if (typeof ctx.roundRect === 'function') {
+                  ctx.roundRect(this.x, currentY, this.width, gradHeight, 16);
+             } else {
+                  // Fallback
+                  const r = 16;
+                  const effR = Math.min(r, gradHeight/2);
+                  ctx.rect(this.x, currentY, this.width, gradHeight); 
+             }
+             ctx.closePath();
+             ctx.fill();
         }
-
         ctx.restore();
     }
-
+    
     contains(px, py) {
         return px >= this.x &&
                px <= this.x + this.width &&
@@ -279,13 +252,13 @@ class Tile {
 }
 
 class Gameboard {
-    constructor(ctx, canvas, image, audio) {
+    constructor(ctx, canvas, image, audio, midiNotes) {
         this.ctx = ctx;
         this.canvas = canvas;
         this.width = canvas.width;
         this.height = canvas.height;
         this.image = image;
-        this.audio = audio; // Background music
+        this.audio = audio; 
 
         this.tiles = [];
         this.score = 0;
@@ -293,20 +266,16 @@ class Gameboard {
         this.active = false;
 
         this.columns = 3;
-        this.columns = 3;
-        this.gap = 10; // Gap between tiles
-        // Calculate lane width considering gaps
-        // We want (width - (gaps)) / columns
+        this.gap = 10; 
         this.tileWidth = (this.width - (this.columns - 1) * this.gap) / this.columns;
-        this.laneWidth = this.width / this.columns; // Still useful for spawning logic base? 
-        // Actually simpler:
-        // col 0: x = 0
-        // col 1: x = tileWidth + gap
-        // col 2: x = 2 * (tileWidth + gap)
-        
-        this.tileHeight = 220; // User preferred height
+        this.tileHeight = 220; 
         
         this.scoreDisplay = document.getElementById('score-display');
+        
+        // MIDI Notes Queue
+        // Format: { time: seconds, midi: number, spawned: false }
+        this.noteQueue = midiNotes || [];
+        this.startTime = 0;
     }
 
     resize(width, height) {
@@ -317,52 +286,45 @@ class Gameboard {
 
     start() {
         this.active = true;
+        this.startTime = performance.now(); // Start sync clock
         this.bindInput();
-        this.spawnTimer = setInterval(() => this.spawnTile(), 600);
+        
+        // Start Audio if available
+        if (this.audio) {
+            this.audio.currentTime = 0;
+            this.audio.play().catch(e => console.log("Music play failed:", e));
+        }
+
         requestAnimationFrame(this.update.bind(this));
     }
 
     bindInput() {
-        // Handle both mouse and touch
         const handleInteraction = (e) => {
             if (!this.active) return;
             e.preventDefault();
-            
             const rect = this.canvas.getBoundingClientRect();
             let clientX, clientY;
-            
-            if (e.changedTouches) {
+             if (e.changedTouches) {
                 clientX = e.changedTouches[0].clientX;
                 clientY = e.changedTouches[0].clientY;
             } else {
                 clientX = e.clientX;
                 clientY = e.clientY;
             }
-
-            // Scale coordinates if canvas display size differs from internal resolution
             const scaleX = this.canvas.width / rect.width;
             const scaleY = this.canvas.height / rect.height;
-
             const x = (clientX - rect.left) * scaleX;
             const y = (clientY - rect.top) * scaleY;
-
             this.handleTap(x, y);
         };
-
         this.canvas.addEventListener("pointerdown", handleInteraction);
     }
 
     handleTap(x, y) {
-        // Check lowest tiles first (visual priority)
-        // Usually tiles at the bottom are the first ones in the array if we push to end? 
-        // No, we push new tiles. New tiles are at top (y < 0). Old tiles are at bottom.
-        // So iterate tiles.
-        
+        // Restrict input to bottom 50%
+        if (y < this.height * 0.5) return;
+
         let hitMade = false;
-        
-        // Find the specific tile clicked.
-        // We iterate backwards to prioritize those on top (z-index wise) conceptually, 
-        // though here they don't overlap much.
         for (let i = 0; i < this.tiles.length; i++) {
             let tile = this.tiles[i];
             if (tile.contains(x, y) && !tile.hit) {
@@ -370,24 +332,9 @@ class Gameboard {
                 this.score++;
                 this.updateScoreUI();
                 hitMade = true;
-                break; // One tap per tile
+                break; 
             }
         }
-    }
-
-    spawnTile() {
-        if (!this.active) return;
-        let col = Math.floor(Math.random() * this.columns);
-        // Position: col * (width + gap)
-        this.tiles.push(
-            new Tile(
-                col * (this.tileWidth + this.gap), 
-                -this.tileHeight,
-                this.tileWidth, 
-                this.tileHeight,
-                this.image
-            )
-        );
     }
 
     update() {
@@ -396,27 +343,55 @@ class Gameboard {
         
         this.ctx.clearRect(0, 0, this.width, this.height);
 
+        // Spawn Logic based on MIDI
+        const currentTime = (performance.now() - this.startTime) / 1000; // Seconds
+        
+        // Look ahead for spawns
+        // We want the tile to hit the "sweet spot" (e.g., bottom 20% or just fully visible) when the music note plays.
+        // Let's say travel time is screenHeight / velocity.
+        // But 'velocity' is per frame. Assuming 60fps, pixels/sec = velocity * 60.
+        // tileSpeed = 17 * 60 = 1020 px/s.
+        // if height is 900px, travel time is ~0.9s.
+        // So we spawn 0.9s BEFORE the note time.
+        
+        // However, a simpler synced approach for V1:
+        // Spawn when (noteTime - leadTime) <= currentTime.
+        // Let's try spawning exactly at noteTime for now to see, or slightly earlier.
+        // User asked "keluarnya tails sekaranng sesuai midi".
+        
+        const spawnLeadTime = 1.0; // Seconds before note to spawn
+        
+        for (let note of this.noteQueue) {
+            if (!note.spawned && note.time - spawnLeadTime <= currentTime) {
+                this.spawnTileForNote(note);
+                note.spawned = true;
+            }
+        }
+
         for (let i = 0; i < this.tiles.length; i++) {
             let tile = this.tiles[i];
             tile.update();
             tile.draw(this.ctx);
 
-            // Remove if animation done
             if (tile.hit && tile.hitProgress >= 1) {
-                this.tiles.splice(i, 1);
-                i--;
-                continue;
+                // Keep it until fully off screen or opaque?
+                // Logic says "menghilang" (disappear). User said "tetap lanjut" (continue falling).
+                // Our update() continues falling. 
+                // We should remove if off screen OR invisible.
+            }
+            // Remove if invisible
+            if (tile.hit && tile.hitProgress >= 1) {
+                 // Actually the fade out logic makes it invisible. Remove it.
+                 this.tiles.splice(i, 1);
+                 i--;
+                 continue;
             }
 
-            // Remove if fell off screen
             if (tile.y > this.height) {
-                // If it wasn't hit, it's a fail -> Game Over
                 if (!tile.hit) {
                     this.fails++;
-                    this.stop(); // Stop the game loop
-                    // Simple Game Over logic
+                    this.stop(); 
                     alert("Game Over! Score: " + this.score);
-                    // Reload or reset?
                     location.reload(); 
                     return; 
                 }
@@ -426,15 +401,26 @@ class Gameboard {
         }
     }
     
+    spawnTileForNote(note) {
+         // Map note midi value to 0, 1, 2
+         const col = note.midi % this.columns;
+         this.tiles.push(
+            new Tile(
+                col * (this.tileWidth + this.gap), 
+                -this.tileHeight,
+                this.tileWidth, 
+                this.tileHeight,
+                this.image
+            )
+        );
+    }
+    
     updateScoreUI() {
         if(this.scoreDisplay) this.scoreDisplay.textContent = this.score;
     }
     
     stop() {
         this.active = false;
-        clearInterval(this.spawnTimer);
-        
-        // Stop music if playing
         if (this.audio) {
             this.audio.pause();
             this.audio.currentTime = 0;
@@ -442,66 +428,79 @@ class Gameboard {
     }
 }
 
-function initGame() {
+async function initGame() {
     showPage('game');
-    
     const canvas = document.getElementById("board");
     const container = document.getElementById("page-game");
-    
-    // Set internal resolution to match container's rendered size for crispness
-    // or fix it to a logical size like 360x700 for consistency.
-    // Let's use the container size.
     canvas.width = container.clientWidth;
     canvas.height = container.clientHeight;
-    
     const ctx = canvas.getContext("2d");
-    
     const tileImage = new Image();
     tileImage.src = TILE_IMAGE_URL;
-    
-    let game; // Define game visible to resize scope
 
-    // Handle Resize
+    // Fetch MIDI (Embedded to avoid CORS on local file protocol)
+    const MIDI_DATA_BASE64 = "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";
+
+    let midiNotes = [];
+    try {
+        // Decode Base64 to ArrayBuffer
+        const binaryString = atob(MIDI_DATA_BASE64);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        
+        // Parse MIDI directly from buffer
+        const midi = new Midi(bytes);
+        if (midi.tracks.length > 0) {
+            const rawNotes = midi.tracks[0].notes;
+            
+            // Filter Notes: Prevent overlap and reduce density
+            // Sort by time just in case
+            rawNotes.sort((a, b) => a.time - b.time);
+            
+            const MIN_NOTE_GAP = 0.3; // 300ms gap
+            let lastNoteTime = -MIN_NOTE_GAP;
+            
+            midiNotes = rawNotes.filter(note => {
+                if (note.time - lastNoteTime >= MIN_NOTE_GAP) {
+                    lastNoteTime = note.time;
+                    return true;
+                }
+                return false;
+            });
+
+            console.log(`Loaded MIDI notes: ${midiNotes.length} (Filtered from ${rawNotes.length})`);
+        }
+    } catch (e) {
+        console.error("Failed to load MIDI:", e);
+    }
+
+    let game; 
     window.addEventListener('resize', () => {
         if (!document.getElementById('page-game').classList.contains('hidden')) {
              canvas.width = container.clientWidth;
              canvas.height = container.clientHeight;
-             if (game) {
-                 game.resize(canvas.width, canvas.height);
-             }
+             if (game) game.resize(canvas.width, canvas.height);
         }
     });
 
-    // Handle Music Playback
-    // Assuming 'selectedSong' global variable holds the data-song value
-    // Map "song one" to theme_one.mp3
-    // We need to access selectedSong from the outer scope or pass it in. 
-    // It's defined in DOMContentLoaded scope. We should move InitGame inside or pass it.
-    // But initGame is called by startCountdown which is global.
-    // Let's attach selectedSong to a global or just check the DOM element selected?
-    // The previously selected element has 'selected' class.
-    
+    // Audio Setup
     const selectedOption = document.querySelector('.song-option.selected');
     let bgm = null;
     if (selectedOption) {
-        const songName = selectedOption.dataset.song; // "song one"
-        let audioSrc = null;
-        
-        if (songName === "song one") {
-            audioSrc = "assets/sounds/theme/theme_one.mp3";
-        }
-        // Add other mappings if needed
-        
-        if (audioSrc) {
-            bgm = new Audio(audioSrc);
-            bgm.volume = 0.5;
-            bgm.loop = true;
-            bgm.play().catch(e => console.log("Music play failed:", e));
-        }
+        let audioSrc = "assets/sounds/theme/theme_one.mp3"; // Default
+        if(selectedOption.dataset.song === "song one") audioSrc = "assets/sounds/theme/theme_one.mp3";
+        bgm = new Audio(audioSrc);
+        bgm.volume = 0.5;
+        // midi_one.mid usually matches theme_one.mp3.
     }
 
     tileImage.onload = () => {
-        game = new Gameboard(ctx, canvas, tileImage, bgm);
+        game = new Gameboard(ctx, canvas, tileImage, bgm, midiNotes);
+        // Start game immediately or wait? The previous logic had a countdown.
+        // This initGame is called AFTER countdown.
         game.start();
     };
 }
