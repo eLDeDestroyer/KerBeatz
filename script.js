@@ -202,7 +202,7 @@ class Tile {
         if (this.hit) {
             // Hit animation: Red gradient rises up
             // Increased speed as requested
-            this.hitProgress += 0.15; 
+            this.hitProgress += 0.1; 
         }
     }
 
