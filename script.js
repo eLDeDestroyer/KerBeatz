@@ -719,6 +719,8 @@ async function initGame() {
     ]);
    
     let midiNotes = [];
+    let songDuration = 0;
+    
     try {
         // Parse MIDI directly from byte array (no base64 decoding needed!)
         const midi = new Midi(midiBytes);
@@ -726,26 +728,28 @@ async function initGame() {
         
         if (midi.tracks.length > 0) {
             const rawNotes = midi.tracks[0].notes;
-            
-            // Filter Notes: Progressive Difficulty
-            // 0-15s: Moderate (Gap 0.6s)
-            // 15-30s: Dense (Gap 0.4s)
-            // 30-45s: Very Dense (Gap 0.3s)
-            // 45s+: Max Density (Gap 0.2s - Phys limit)
-            
             rawNotes.sort((a, b) => a.time - b.time);
             
-            let lastSpawnTime = -2.0; // Initialize so first note can spawn
+            // Get song duration from last note
+            songDuration = rawNotes[rawNotes.length - 1].time + rawNotes[rawNotes.length - 1].duration;
+            
+            // Progressive Difficulty Filter (resets every loop)
+            // 0-15s: Easy - Few blocks (Gap 0.6s)
+            // 15-30s: Medium - More blocks (Gap 0.4s)
+            // 30-45s: Hard - Many blocks (Gap 0.3s)
+            // 45s+: Very Hard - Most blocks (Gap 0.2s)
+            
+            let lastSpawnTime = -2.0;
             
             midiNotes = rawNotes.filter(note => {
                 const time = note.time;
-                const segment = Math.floor(time / 15);
-                let currentGap = 0.2; // Default (Max)
+                const segment = Math.floor(time / 15); // Which 15-second segment
+                let currentGap;
                 
-                if (segment === 0) currentGap = 0.6; 
-                else if (segment === 1) currentGap = 0.4;
-                else if (segment === 2) currentGap = 0.3;
-                else currentGap = 0.2; 
+                if (segment === 0) currentGap = 0.6;      // 0-15s: Easy (few blocks)
+                else if (segment === 1) currentGap = 0.4; // 15-30s: Medium
+                else if (segment === 2) currentGap = 0.3; // 30-45s: Hard
+                else currentGap = 0.2;                    // 45s+: Very Hard (many blocks)
                 
                 if (time - lastSpawnTime >= currentGap) {
                     lastSpawnTime = time;
@@ -754,7 +758,8 @@ async function initGame() {
                 return false;
             });
 
-            console.log(`Loaded MIDI notes: ${midiNotes.length} (Filtered from ${rawNotes.length})`);
+            console.log(`Loaded MIDI notes: ${midiNotes.length} (from ${rawNotes.length} total)`);
+            console.log(`Song duration: ${songDuration.toFixed(2)}s`);
         }
     } catch (e) {
         console.error("Failed to load MIDI:", e);
@@ -782,9 +787,7 @@ async function initGame() {
     }
 
     tileImage.onload = () => {
-        game = new Gameboard(ctx, canvas, tileImage, bgm, midiNotes);
-        // Start game immediately or wait? The previous logic had a countdown.
-        // This initGame is called AFTER countdown.
+        game = new Gameboard(ctx, canvas, tileImage, bgm, midiNotes, songDuration);
         game.start();
     };
 }
