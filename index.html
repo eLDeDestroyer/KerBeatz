@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KerBeatz Game</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
     <main id="mobile-frame">
@@ -25,11 +27,11 @@
                 <label class="question-text">Please input your full name</label>
                 <input type="text" class="game-input" placeholder="input your name">
             </div>
-            
+
             <!-- Dragon Guide (Visible only on error) -->
             <div id="dragon-p3" class="dragon-container hidden">
-                 <img src="./assets/image/guide/char.png" alt="Dragon Guide" class="dragon-img">
-                 <div class="dragon-bubble">Please text your name!</div>
+                <img src="./assets/image/guide/char.png" alt="Dragon Guide" class="dragon-img">
+                <div class="dragon-bubble">Please text your name!</div>
             </div>
 
             <button id="btn-next-p3" class="game-btn">Next</button>
@@ -40,15 +42,15 @@
             <div class="input-group" style="gap: 1rem;">
                 <label class="question-text">Select your song</label>
                 <!-- Selectable options instead of inputs -->
-                <div class="song-option" data-song="song one">song one</div>
+                <div class="song-option" data-song="Ayo Melangkah">Ayo Melangkah</div>
                 <div class="song-option locked" data-song="River Flows in You">River Flows in You</div>
                 <div class="song-option locked" data-song="Fur Elise">Fur Elise</div>
             </div>
-            
+
             <!-- Dragon Guide for Page 4 (Hidden by default) -->
             <div id="dragon-p4" class="dragon-container hidden">
-                 <img src="./assets/image/guide/char.png" alt="Dragon Guide" class="dragon-img">
-                 <div class="dragon-bubble">This song is locked!</div>
+                <img src="./assets/image/guide/char.png" alt="Dragon Guide" class="dragon-img">
+                <div class="dragon-bubble">This song is locked!</div>
             </div>
             <button id="btn-next-p4" class="game-btn">Next</button>
         </div>
@@ -65,10 +67,22 @@
         </div>
         <!-- Page 7: Game Over -->
         <div id="page-game-over" class="page-container hidden">
-            <h1 id="go-song-name">Song Name</h1>
             <div class="go-content-wrapper">
-                <img src="./assets/image/dragon/happy_dragon.png" alt="Result" class="go-image">
-                <div id="go-score">0</div>
+                <div class="go-panel-wrapper">
+                    <img id="go-panel" src="./assets/image/game_over/panel/panel.png" alt="Panel" class="go-panel">
+                    <div class="go-panel-content">
+                        <img id="go-rank" src="./assets/image/game_over/score/d_scoe.png" alt="Rank"
+                            class="go-rank-img">
+                        <div id="go-score">0</div>
+                    </div>
+                </div>
+                <img id="go-dragon" src="./assets/image/game_over/dragon/d_dragon.png" alt="Dragon" class="go-dragon">
+            </div>
+            <div class="go-song-wrapper">
+                <svg class="go-music-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                    <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
+                </svg>
+                <h1 id="go-song-name">Song Name</h1>
             </div>
             <div id="go-high-score">High Score : 0</div>
         </div>
@@ -77,4 +91,5 @@
     <script src="https://unpkg.com/@tonejs/midi"></script>
     <script src="script.js"></script>
 </body>
+
 </html>
