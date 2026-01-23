@@ -361,20 +361,16 @@ class Gameboard {
         // Spawn Logic based on MIDI
         const currentTime = (performance.now() - this.startTime) / 1000; // Seconds
         
-        // Look ahead for spawns
-        // We want the tile to hit the "sweet spot" (e.g., bottom 20% or just fully visible) when the music note plays.
-        // Let's say travel time is screenHeight / velocity.
-        // But 'velocity' is per frame. Assuming 60fps, pixels/sec = velocity * 60.
-        // tileSpeed = 17 * 60 = 1020 px/s.
-        // if height is 900px, travel time is ~0.9s.
-        // So we spawn 0.9s BEFORE the note time.
+        // Calculate accurate spawn lead time based on screen height and velocity
+        // Tiles should arrive at the bottom (tap zone) exactly when the music plays
+        // velocity = 17 pixels per frame
+        // At 60fps: 17 * 60 = 1020 pixels/second
+        // Travel distance = screen height + tile height (to fully enter screen)
+        // Lead time = (height + tileHeight) / (velocity * 60)
         
-        // However, a simpler synced approach for V1:
-        // Spawn when (noteTime - leadTime) <= currentTime.
-        // Let's try spawning exactly at noteTime for now to see, or slightly earlier.
-        // User asked "keluarnya tails sekaranng sesuai midi".
-        
-        const spawnLeadTime = 1.0; // Seconds before note to spawn
+        const pixelsPerSecond = this.tiles[0]?.velocity * 60 || 17 * 60; // 1020 px/s
+        const travelDistance = this.height + this.tileHeight;
+        const spawnLeadTime = travelDistance / pixelsPerSecond; // Dynamic calculation
         
         for (let note of this.noteQueue) {
             if (!note.spawned && note.time - spawnLeadTime <= currentTime) {
