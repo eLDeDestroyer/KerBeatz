@@ -277,7 +277,10 @@ class Gameboard {
         this.tiles = [];
         this.score = 0;
         this.fails = 0;
+        this.lives = 3; // Initialize lives
         this.active = false;
+        
+        this.updateLivesUI(); // Reset UI on init
 
         this.columns = 3;
         this.gap = 10; 
@@ -401,9 +404,14 @@ class Gameboard {
             if (tile.y > this.height) {
                 if (!tile.hit) {
                     this.fails++;
-                    this.stop(); 
-                    showGameOver(this.score);
-                    return; 
+                    this.lives--;
+                    this.updateLivesUI(); // Update UI to show broken heart
+                    
+                    if (this.lives <= 0) {
+                        this.stop(); 
+                        showGameOver(this.score);
+                        return; 
+                    }
                 }
                 this.tiles.splice(i, 1);
                 i--;
@@ -427,6 +435,24 @@ class Gameboard {
     
     updateScoreUI() {
         if(this.scoreDisplay) this.scoreDisplay.textContent = this.score;
+    }
+
+    updateLivesUI() {
+        const heartImg = "./assets/image/hearts/heart.png";
+        const brokenHeartImg = "./assets/image/hearts/broken_heart.png";
+
+        for (let i = 1; i <= 3; i++) {
+            const lifeEl = document.getElementById(`life-${i}`);
+            if (lifeEl) {
+                if (i > this.lives) {
+                    // This life is lost
+                    lifeEl.src = brokenHeartImg;
+                } else {
+                    // This life is active
+                    lifeEl.src = heartImg;
+                }
+            }
+        }
     }
     
     stop() {
