@@ -486,3 +486,30 @@ body {
   height: auto;
   filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
 }
+
+/* Combo Display */
+#combo-display {
+  position: absolute;
+  top: 25%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: "Nunito", sans-serif;
+  font-weight: 800;
+  font-size: 40px;
+  color: white; /* Default color, overridden by JS */
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+  pointer-events: none;
+  transition: color 0.3s ease;
+}
+
+/* Combo Animation */
+@keyframes comboPop {
+  0% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.3); }
+  100% { transform: translateX(-50%) scale(1); }
+}
+
+.combo-pop {
+  animation: comboPop 0.15s ease-out;
+}

@@ -278,9 +278,14 @@ class Gameboard {
         this.score = 0;
         this.fails = 0;
         this.lives = 3; // Initialize lives
+        this.score = 0;
+        this.fails = 0;
+        this.lives = 3; 
+        this.combo = 0; // Initialize combo
         this.active = false;
         
-        this.updateLivesUI(); // Reset UI on init
+        this.updateLivesUI(); 
+        this.updateComboUI(); // Reset Combo UI
 
         this.columns = 3;
         this.gap = 10; 
@@ -288,6 +293,7 @@ class Gameboard {
         this.tileHeight = 220; 
         
         this.scoreDisplay = document.getElementById('score-display');
+        this.comboDisplay = document.getElementById('combo-display'); // Get Combo Element
         
         // MIDI Notes Queue
         // Format: { time: seconds, midi: number, spawned: false }
@@ -348,7 +354,12 @@ class Gameboard {
             if (tile.contains(x, y) && !tile.hit) {
                 tile.hit = true;
                 this.score++;
+                
+                // Combo Logic
+                this.combo++;
                 this.updateScoreUI();
+                this.updateComboUI();
+                
                 hitMade = true;
                 break; 
             }
@@ -405,7 +416,12 @@ class Gameboard {
                 if (!tile.hit) {
                     this.fails++;
                     this.lives--;
-                    this.updateLivesUI(); // Update UI to show broken heart
+                    
+                    // Reset Combo on Miss
+                    this.combo = 0;
+                    this.updateComboUI();
+                    
+                    this.updateLivesUI();
                     
                     if (this.lives <= 0) {
                         this.stop(); 
@@ -457,9 +473,43 @@ class Gameboard {
     
     stop() {
         this.active = false;
+        this.combo = 0; // Reset combo on stop
+        this.updateComboUI();
         if (this.audio) {
             this.audio.pause();
             this.audio.currentTime = 0;
+        }
+    }
+
+    updateComboUI() {
+        if (!this.comboDisplay) return;
+
+        if (this.combo >= 10) {
+            this.comboDisplay.classList.remove('hidden');
+            this.comboDisplay.textContent = `Combo ${this.combo}x`;
+            
+            // Pop Animation
+            this.comboDisplay.classList.remove('combo-pop');
+            void this.comboDisplay.offsetWidth; // Trigger reflow
+            this.comboDisplay.classList.add('combo-pop');
+
+            // Color Change every 10x
+            // 10-19: White (Default)
+            // 20-29: Yellow
+            // 30-39: Orange
+            // 40-49: Red
+            // 50+: Purple/Rainbow
+            const tier = Math.floor(this.combo / 10);
+            let color = 'white';
+            if (tier === 2) color = '#FFD700'; // Gold
+            else if (tier === 3) color = '#FFA500'; // Orange
+            else if (tier === 4) color = '#FF4500'; // Red-Orange
+            else if (tier >= 5) color = '#FF00FF'; // Magenta
+
+            this.comboDisplay.style.color = color;
+
+        } else {
+            this.comboDisplay.classList.add('hidden');
         }
     }
 }
